@@ -20,7 +20,7 @@ export default function IncidentCard({ incident }: { incident: Incident }) {
   return (
     <Link
       href={`/incident/${incident.id}`}
-      className="group relative flex gap-3 overflow-hidden rounded-xl border border-border bg-surface p-3 pl-4 transition-all hover:-translate-y-0.5 hover:shadow-md"
+      className="group relative flex shrink-0 gap-3 overflow-hidden rounded-xl border border-border bg-surface p-3 pl-4 transition-all hover:-translate-y-0.5 hover:shadow-md"
     >
       <span
         className="absolute inset-y-0 left-0 w-1"
