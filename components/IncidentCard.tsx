@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { Incident } from "@/lib/types";
+import { CATEGORIES } from "@/lib/categories";
 import { CategoryBadge, PhotoPlaceholder, StatusBadge } from "./ui";
 
 function timeAgo(iso: string): string {
@@ -19,8 +20,13 @@ export default function IncidentCard({ incident }: { incident: Incident }) {
   return (
     <Link
       href={`/incident/${incident.id}`}
-      className="group flex gap-3 rounded-xl border border-border bg-surface p-3 transition-shadow hover:shadow-md"
+      className="group relative flex gap-3 overflow-hidden rounded-xl border border-border bg-surface p-3 pl-4 transition-all hover:-translate-y-0.5 hover:shadow-md"
     >
+      <span
+        className="absolute inset-y-0 left-0 w-1"
+        style={{ backgroundColor: CATEGORIES[incident.category].color }}
+        aria-hidden
+      />
       <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg">
         {incident.photos[0] ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -30,19 +36,15 @@ export default function IncidentCard({ incident }: { incident: Incident }) {
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <CategoryBadge category={incident.category} />
           <StatusBadge status={incident.status} />
         </div>
         <div className="mt-1 truncate text-sm font-medium text-foreground group-hover:text-brand">
           {incident.title}
         </div>
-        <div className="mt-0.5 flex items-center gap-2 text-xs text-muted">
-          <span>{incident.district}</span>
-          <span>·</span>
-          <span>{timeAgo(incident.createdAt)}</span>
-          <span>·</span>
-          <span>👍 {incident.confirmations}</span>
+        <div className="mt-1 font-mono text-[10.5px] uppercase tracking-wide text-muted">
+          {incident.district} · {timeAgo(incident.createdAt)} · 👍 {incident.confirmations}
         </div>
       </div>
     </Link>

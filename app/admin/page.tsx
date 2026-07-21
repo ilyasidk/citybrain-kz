@@ -107,7 +107,10 @@ export default function AdminPage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-6">
-      <h1 className="text-xl font-semibold">Дашборд акимата</h1>
+      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
+        Служебная панель
+      </p>
+      <h1 className="mt-1 font-display text-xl font-semibold tracking-tight">Дашборд акимата</h1>
       <p className="mt-1 text-sm text-muted">
         Аналитика обращений и приоритизация. Всего инцидентов: {incidents.length}.
       </p>
@@ -155,14 +158,14 @@ export default function AdminPage() {
             <AreaChart data={dynamics} margin={{ top: 8, right: 8, bottom: 8, left: -20 }}>
               <defs>
                 <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#0d5c63" stopOpacity={0.5} />
-                  <stop offset="100%" stopColor="#0d5c63" stopOpacity={0} />
+                  <stop offset="0%" stopColor="#0c6a8d" stopOpacity={0.45} />
+                  <stop offset="100%" stopColor="#0c6a8d" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <XAxis dataKey="name" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
               <Tooltip />
-              <Area type="monotone" dataKey="value" stroke="#0d5c63" fill="url(#g)" strokeWidth={2} />
+              <Area type="monotone" dataKey="value" stroke="#0c6a8d" fill="url(#g)" strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
         </Card>
@@ -173,7 +176,7 @@ export default function AdminPage() {
               <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
               <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={80} />
               <Tooltip />
-              <Bar dataKey="value" fill="#0d5c63" radius={[0, 4, 4, 0]} />
+              <Bar dataKey="value" fill="#0c6a8d" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </Card>
@@ -199,7 +202,7 @@ export default function AdminPage() {
         <div className="-mx-4 overflow-x-auto sm:mx-0">
           <table className="w-full min-w-[640px] text-sm">
             <thead>
-              <tr className="border-b border-border text-left text-xs text-muted">
+              <tr className="border-b border-border text-left font-mono text-[10px] uppercase tracking-wider text-muted">
                 <th className="px-3 py-2 font-medium">Проблема</th>
                 <th className="px-3 py-2 font-medium">Район</th>
                 <th className="px-3 py-2 font-medium">Подтв.</th>
@@ -254,13 +257,13 @@ export default function AdminPage() {
   );
 }
 
-function Kpi({ label, value, color = "#0d5c63" }: { label: string; value: number | string; color?: string }) {
+function Kpi({ label, value, color = "#0c6a8d" }: { label: string; value: number | string; color?: string }) {
   return (
     <div className="rounded-xl border border-border bg-surface p-4">
-      <div className="text-2xl font-bold" style={{ color }}>
+      <div className="font-display text-[22px] font-semibold leading-none" style={{ color }}>
         {value}
       </div>
-      <div className="text-xs text-muted">{label}</div>
+      <div className="mt-1.5 text-[11px] uppercase tracking-wide text-muted">{label}</div>
     </div>
   );
 }

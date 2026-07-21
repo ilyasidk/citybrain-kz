@@ -1,13 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f1f5f9;
+  --background: #eef2f4;
   --surface: #ffffff;
-  --foreground: #0f172a;
-  --muted: #64748b;
-  --border: #e2e8f0;
-  --brand: #0d5c63;
+  --foreground: #12222c;
+  --muted: #5d707c;
+  --border: #d9e2e7;
+  --brand: #0c6a8d;
+  --brand-strong: #084f6b;
   --brand-fg: #ffffff;
+  --accent: #1795bd;
+  --sun: #f0b120;
+  --ink: #12222c;
 }
 
 @theme inline {
@@ -17,8 +21,12 @@
   --color-muted: var(--muted);
   --color-border: var(--border);
   --color-brand: var(--brand);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-accent: var(--accent);
+  --color-sun: var(--sun);
+  --color-ink: var(--ink);
+  --font-sans: var(--font-golos);
+  --font-display: var(--font-unbounded);
+  --font-mono: var(--font-jbmono);
 }
 
 html,
@@ -29,35 +37,64 @@ body {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  font-family: var(--font-golos), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Leaflet — гарантируем корректную высоту и слои. */
+::selection {
+  background: var(--sun);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Сигнатура: лента «сигнальной разметки» городских служб. */
+.stripe {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--sun) 0 12px,
+    var(--ink) 12px 24px
+  );
+}
+
+/* Leaflet — корректная высота, слои и попапы под стиль приложения. */
 .leaflet-container {
   width: 100%;
   height: 100%;
-  background: #dfe6ea;
+  background: #e7ecec;
   font-family: inherit;
   z-index: 0;
 }
 
+.leaflet-popup-content-wrapper {
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 30px rgba(18, 34, 44, 0.18);
+}
+
 .leaflet-popup-content {
-  margin: 10px 12px;
+  margin: 12px 14px;
   font-family: inherit;
+}
+
+.leaflet-bar a {
+  color: var(--foreground);
 }
 
 .cb-pin {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 50% 50% 50% 0;
   transform: rotate(-45deg);
   border: 2px solid #ffffff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
-  font-size: 14px;
+  box-shadow: 0 3px 8px rgba(18, 34, 44, 0.35);
+  font-size: 15px;
 }
 
 .cb-pin > span {
@@ -71,4 +108,13 @@ body {
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
 }

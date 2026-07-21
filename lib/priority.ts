@@ -40,7 +40,7 @@ export function computePriority(incident: Incident, now: number = Date.now()): P
 }
 
 export const PRIORITY_META: Record<PriorityLevel, { label: string; color: string }> = {
-  low: { label: "Низкий", color: "#22c55e" },
-  medium: { label: "Средний", color: "#f59e0b" },
-  high: { label: "Высокий", color: "#ef4444" },
+  low: { label: "Низкий", color: "#16a34a" },
+  medium: { label: "Средний", color: "#d97706" },
+  high: { label: "Высокий", color: "#dc2626" },
 };

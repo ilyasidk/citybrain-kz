@@ -55,6 +55,13 @@ export default function HomePage() {
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-3 px-4 py-4">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h1 className="font-display text-lg font-semibold tracking-tight">Карта обращений</h1>
+        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
+          Алматы · обновляется жителями
+        </span>
+      </div>
+
       {/* Фильтры категорий */}
       <div className="flex flex-wrap items-center gap-2">
         <div className="flex flex-wrap gap-1.5">
@@ -126,18 +133,18 @@ export default function HomePage() {
 
       {/* Сводка */}
       <div className="flex flex-wrap gap-2 text-xs">
-        <Stat label="Всего" value={counts.total} color="#0d5c63" />
+        <Stat label="Всего" value={counts.total} color="#0c6a8d" />
         <Stat label="Новые" value={counts.new} color={STATUS_META.new.color} />
         <Stat label="В работе" value={counts.in_progress} color={STATUS_META.in_progress.color} />
         <Stat label="Решено" value={counts.resolved} color={STATUS_META.resolved.color} />
       </div>
 
       <div className="grid flex-1 gap-4 lg:grid-cols-[1fr_380px]">
-        <div className="order-2 h-[50vh] overflow-hidden rounded-xl border border-border lg:order-1 lg:h-[calc(100vh-11rem)]">
+        <div className="order-2 h-[50vh] overflow-hidden rounded-2xl border border-border shadow-sm lg:order-1 lg:h-[calc(100vh-14rem)]">
           <MapView incidents={filtered} />
         </div>
 
-        <div className="order-1 flex flex-col gap-2 lg:order-2 lg:h-[calc(100vh-11rem)] lg:overflow-y-auto lg:pr-1">
+        <div className="order-1 flex flex-col gap-2 lg:order-2 lg:h-[calc(100vh-14rem)] lg:overflow-y-auto lg:pr-1">
           {!hydrated ? (
             <div className="text-sm text-muted">Загрузка обращений…</div>
           ) : filtered.length === 0 ? (
@@ -155,9 +162,12 @@ export default function HomePage() {
 
       <Link
         href="/report"
-        className="fixed bottom-5 right-5 z-30 flex items-center gap-2 rounded-full bg-brand px-5 py-3 text-sm font-semibold text-[var(--brand-fg)] shadow-lg transition-transform hover:scale-105"
+        className="fixed bottom-5 right-5 z-30 flex items-center gap-2.5 rounded-full bg-brand py-2.5 pl-3 pr-5 text-sm font-semibold text-[var(--brand-fg)] shadow-lg shadow-brand/30 transition-all hover:-translate-y-0.5 hover:shadow-xl"
       >
-        <span className="text-lg leading-none">＋</span> Сообщить о проблеме
+        <span className="grid h-7 w-7 place-items-center rounded-full bg-sun text-base font-bold leading-none text-ink">
+          ＋
+        </span>
+        Сообщить о проблеме
       </Link>
     </div>
   );
@@ -165,10 +175,10 @@ export default function HomePage() {
 
 function Stat({ label, value, color }: { label: string; value: number; color: string }) {
   return (
-    <div className="flex items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-1.5">
+    <div className="flex items-center gap-2.5 rounded-xl border border-border bg-surface px-3.5 py-2">
       <span className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
-      <span className="font-semibold">{value}</span>
-      <span className="text-muted">{label}</span>
+      <span className="font-display text-base font-semibold leading-none">{value}</span>
+      <span className="text-[11px] uppercase tracking-wide text-muted">{label}</span>
     </div>
   );
 }

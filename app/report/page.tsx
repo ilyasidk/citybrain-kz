@@ -115,23 +115,29 @@ export default function ReportPage() {
 
   if (created) {
     return (
-      <div className="mx-auto w-full max-w-md px-4 py-10 text-center">
-        <div className="text-5xl">✅</div>
-        <h1 className="mt-3 text-xl font-semibold">Обращение принято в обработку</h1>
-        <p className="mt-1 text-sm text-muted">
-          Номер инцидента: <span className="font-mono font-semibold">{created.id}</span>
-        </p>
-        <div className="mt-3 flex justify-center">
-          <StatusBadge status={created.status} />
+      <div className="mx-auto w-full max-w-md px-4 py-10">
+        <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
+          <div className="stripe h-2" aria-hidden />
+          <div className="p-6 text-center">
+            <div className="text-4xl">✅</div>
+            <h1 className="mt-3 font-display text-lg font-semibold">Обращение принято</h1>
+            <p className="mt-1 text-sm text-muted">Талон обращения</p>
+            <div className="mx-auto mt-3 w-fit rounded-lg border border-dashed border-border bg-background px-4 py-2 font-mono text-sm font-semibold tracking-wider">
+              {created.id}
+            </div>
+            <div className="mt-3 flex justify-center">
+              <StatusBadge status={created.status} />
+            </div>
+          </div>
         </div>
-        <div className="mt-6 flex flex-col gap-2">
+        <div className="mt-4 flex flex-col gap-2 text-center">
           <Link
             href={`/incident/${created.id}`}
             className="rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-[var(--brand-fg)]"
           >
             Открыть карточку инцидента
           </Link>
-          <Link href="/" className="rounded-lg border border-border px-4 py-2.5 text-sm">
+          <Link href="/" className="rounded-lg border border-border bg-surface px-4 py-2.5 text-sm">
             Вернуться на карту
           </Link>
         </div>
@@ -141,14 +147,17 @@ export default function ReportPage() {
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-6">
-      <h1 className="text-xl font-semibold">Сообщить о проблеме</h1>
+      <h1 className="font-display text-xl font-semibold tracking-tight">Сообщить о проблеме</h1>
       <p className="mt-1 text-sm text-muted">
         Прикрепите фото — AI предложит категорию. Точку можно уточнить на карте.
       </p>
 
       {/* Фото */}
-      <section className="mt-5">
-        <label className="text-sm font-medium">Фото (до 3)</label>
+      <section className="mt-5 rounded-xl border border-border bg-surface p-4">
+        <div className="flex items-baseline gap-2">
+          <span className="font-display text-[11px] font-semibold text-muted">01</span>
+          <label className="text-sm font-semibold">Фото (до 3)</label>
+        </div>
         <div className="mt-2 flex gap-2">
           {photos.map((p, idx) => (
             <div key={idx} className="relative h-24 w-24 overflow-hidden rounded-lg border border-border">
@@ -182,22 +191,28 @@ export default function ReportPage() {
       </section>
 
       {/* Описание */}
-      <section className="mt-5">
-        <label className="text-sm font-medium">Описание</label>
+      <section className="mt-4 rounded-xl border border-border bg-surface p-4">
+        <div className="flex items-baseline gap-2">
+          <span className="font-display text-[11px] font-semibold text-muted">02</span>
+          <label className="text-sm font-semibold">Описание</label>
+        </div>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           onBlur={() => !category && runClassify()}
           rows={3}
           placeholder="Опишите проблему: что, где, насколько срочно…"
-          className="mt-2 w-full resize-none rounded-lg border border-border bg-surface p-3 text-sm outline-none focus:border-brand"
+          className="mt-2 w-full resize-none rounded-lg border border-border bg-background p-3 text-sm outline-none focus:border-brand"
         />
       </section>
 
       {/* AI-категория */}
-      <section className="mt-5 rounded-xl border border-border bg-surface p-4">
+      <section className="mt-4 rounded-xl border border-border bg-surface p-4">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium">Категория</span>
+          <div className="flex items-baseline gap-2">
+            <span className="font-display text-[11px] font-semibold text-muted">03</span>
+            <span className="text-sm font-semibold">Категория</span>
+          </div>
           <button
             onClick={() => runClassify()}
             disabled={aiLoading}
@@ -251,9 +266,12 @@ export default function ReportPage() {
       </section>
 
       {/* Геолокация */}
-      <section className="mt-5">
+      <section className="mt-4 rounded-xl border border-border bg-surface p-4">
         <div className="flex items-center justify-between">
-          <label className="text-sm font-medium">Местоположение</label>
+          <div className="flex items-baseline gap-2">
+            <span className="font-display text-[11px] font-semibold text-muted">04</span>
+            <label className="text-sm font-semibold">Местоположение</label>
+          </div>
           <button onClick={useMyLocation} className="text-xs font-semibold text-brand underline">
             📍 Моё местоположение
           </button>
@@ -261,7 +279,7 @@ export default function ReportPage() {
         <div className="mt-2 h-56 overflow-hidden rounded-xl border border-border">
           <MapPicker value={point} onChange={(lat, lng) => setPoint({ lat, lng })} />
         </div>
-        <p className="mt-1 text-xs text-muted">
+        <p className="mt-1.5 font-mono text-[10.5px] uppercase tracking-wide text-muted">
           {district} район · {point.lat.toFixed(5)}, {point.lng.toFixed(5)}
         </p>
       </section>
@@ -270,7 +288,7 @@ export default function ReportPage() {
 
       <button
         onClick={handleSubmit}
-        className="mt-5 w-full rounded-lg bg-brand px-4 py-3 text-sm font-semibold text-[var(--brand-fg)]"
+        className="mt-5 w-full rounded-xl bg-brand px-4 py-3 text-sm font-semibold text-[var(--brand-fg)] shadow-lg shadow-brand/25 transition-all hover:-translate-y-0.5 hover:shadow-xl"
       >
         Отправить обращение
       </button>

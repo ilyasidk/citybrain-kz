@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Unbounded, Golos_Text, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { StoreProvider } from "@/lib/store";
 import Header from "@/components/Header";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+const unbounded = Unbounded({ variable: "--font-unbounded", subsets: ["latin", "cyrillic"] });
+const golos = Golos_Text({ variable: "--font-golos", subsets: ["latin", "cyrillic"] });
+const jbMono = JetBrains_Mono({ variable: "--font-jbmono", subsets: ["latin", "cyrillic"] });
 
 export const metadata: Metadata = {
   title: "CityBrain KZ — карта городских проблем",
@@ -15,7 +16,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ru" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html
+      lang="ru"
+      className={`${unbounded.variable} ${golos.variable} ${jbMono.variable} h-full antialiased`}
+    >
       <body className="min-h-full flex flex-col">
         <StoreProvider>
           <Header />

@@ -46,8 +46,6 @@ export default function IncidentPage({ params }: { params: Promise<{ id: string 
     );
   }
 
-  const c = CATEGORIES[incident.category];
-
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-6">
       <Link href="/" className="text-sm text-muted hover:text-foreground">
@@ -61,9 +59,11 @@ export default function IncidentPage({ params }: { params: Promise<{ id: string 
         {priority && <PriorityBadge level={priority.level} score={priority.score} />}
       </div>
 
-      <h1 className="mt-2 text-2xl font-semibold">{incident.title}</h1>
-      <p className="mt-1 text-sm text-muted">
-        {incident.district} район · создано {fmt(incident.createdAt)} · автор {incident.reporter}
+      <h1 className="mt-2 font-display text-xl font-semibold leading-snug tracking-tight sm:text-2xl">
+        {incident.title}
+      </h1>
+      <p className="mt-1.5 font-mono text-[11px] uppercase tracking-wide text-muted">
+        {incident.district} район · {fmt(incident.createdAt)} · {incident.reporter}
       </p>
 
       {/* Фото */}
@@ -98,7 +98,7 @@ export default function IncidentPage({ params }: { params: Promise<{ id: string 
       {/* Community verification */}
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         <div className="rounded-xl border border-border bg-surface p-4">
-          <div className="text-3xl font-bold text-brand">{incident.confirmations}</div>
+          <div className="font-display text-3xl font-semibold text-brand">{incident.confirmations}</div>
           <div className="text-xs text-muted">подтверждений жителей</div>
           <button
             onClick={() => confirmIncident(incident.id)}
@@ -108,7 +108,7 @@ export default function IncidentPage({ params }: { params: Promise<{ id: string 
           </button>
         </div>
         <div className="rounded-xl border border-border bg-surface p-4">
-          <div className="text-3xl font-bold" style={{ color: STATUS_META.resolved.color }}>
+          <div className="font-display text-3xl font-semibold" style={{ color: STATUS_META.resolved.color }}>
             {incident.resolvedVotes}
           </div>
           <div className="text-xs text-muted">отметок «уже решено»</div>
@@ -147,18 +147,19 @@ export default function IncidentPage({ params }: { params: Promise<{ id: string 
       </div>
 
       {/* История статусов */}
-      <div className="mt-5">
+      <div className="mt-5 rounded-xl border border-border bg-surface p-4">
         <div className="text-sm font-semibold">История статусов</div>
-        <ol className="mt-2 space-y-2">
+        <ol className="relative mt-3 space-y-4">
+          <span className="absolute bottom-1.5 left-[4.5px] top-1.5 w-px bg-border" aria-hidden />
           {incident.statusHistory.map((ev, i) => (
-            <li key={i} className="flex gap-3 text-sm">
+            <li key={i} className="relative flex gap-3 text-sm">
               <span
-                className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full"
+                className="relative z-10 mt-1 h-2.5 w-2.5 shrink-0 rounded-full ring-4 ring-[var(--surface)]"
                 style={{ backgroundColor: STATUS_META[ev.status].color }}
               />
               <div>
                 <span className="font-medium">{STATUS_META[ev.status].label}</span>
-                <span className="text-muted"> · {fmt(ev.at)}</span>
+                <span className="ml-1.5 font-mono text-[11px] text-muted">{fmt(ev.at)}</span>
                 {ev.note && <div className="text-muted">{ev.note}</div>}
               </div>
             </li>
@@ -166,8 +167,8 @@ export default function IncidentPage({ params }: { params: Promise<{ id: string 
         </ol>
       </div>
 
-      <div className="mt-6 text-xs text-muted" style={{ color: c.color }}>
-        ID: <span className="font-mono">{incident.id}</span>
+      <div className="mt-6 font-mono text-[11px] tracking-wide text-muted">
+        ID: {incident.id}
       </div>
     </div>
   );

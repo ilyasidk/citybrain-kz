@@ -7,7 +7,7 @@ import { ALMATY_CENTER } from "@/lib/geo";
 
 const pinIcon = L.divIcon({
   className: "",
-  html: `<div class="cb-pin" style="background:#0d5c63"><span>📍</span></div>`,
+  html: `<div class="cb-pin" style="background:#0c6a8d"><span>📍</span></div>`,
   iconSize: [30, 30],
   iconAnchor: [15, 30],
 });
@@ -35,7 +35,10 @@ export default function MapPickerInner({
       scrollWheelZoom
       className="h-full w-full"
     >
-      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+      />
       <ClickHandler onChange={onChange} />
       <Marker
         position={[value.lat, value.lng]}

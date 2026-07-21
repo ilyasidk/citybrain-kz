@@ -28,7 +28,7 @@ export default function ProfilePage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-6">
       <div className="flex items-center gap-4">
-        <div className="grid h-16 w-16 place-items-center rounded-full bg-brand text-2xl text-[var(--brand-fg)]">
+        <div className="grid h-16 w-16 place-items-center rounded-full bg-brand font-display text-2xl font-semibold text-[var(--brand-fg)]">
           {user.name.slice(0, 1).toUpperCase()}
         </div>
         <div className="flex-1">
@@ -97,8 +97,8 @@ export default function ProfilePage() {
 function Metric({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-xl border border-border bg-surface p-3">
-      <div className="text-2xl font-bold text-brand">{value}</div>
-      <div className="text-xs text-muted">{label}</div>
+      <div className="font-display text-[22px] font-semibold leading-none text-brand">{value}</div>
+      <div className="mt-1.5 text-[11px] uppercase tracking-wide text-muted">{label}</div>
     </div>
   );
 }
