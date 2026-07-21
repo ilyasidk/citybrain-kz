@@ -199,6 +199,12 @@ export default function AdminPage() {
 
       {/* Таблица приоритизации */}
       <Card title="Инциденты по AI-приоритету" className="mt-4">
+        <button
+          onClick={() => exportCsv(ranked)}
+          className="mb-3 rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:border-brand hover:text-brand"
+        >
+          ⬇ Экспорт в CSV
+        </button>
         <div className="-mx-4 overflow-x-auto sm:mx-0">
           <table className="w-full min-w-[640px] text-sm">
             <thead>
@@ -255,6 +261,34 @@ export default function AdminPage() {
       </Card>
     </div>
   );
+}
+
+function exportCsv(
+  ranked: { incident: import("@/lib/types").Incident; priority: { score: number; level: string } }[],
+) {
+  const header = ["ID", "Проблема", "Категория", "Район", "Статус", "Подтверждений", "Приоритет", "Скор", "Создано"];
+  const rows = ranked.map(({ incident: i, priority: p }) => [
+    i.id,
+    i.title,
+    CATEGORIES[i.category].label,
+    i.district,
+    STATUS_META[i.status].label,
+    i.confirmations,
+    p.level,
+    p.score,
+    new Date(i.createdAt).toLocaleDateString("ru-RU"),
+  ]);
+  const csv =
+    "﻿" +
+    [header, ...rows]
+      .map((r) => r.map((v) => `"${String(v).replaceAll('"', '""')}"`).join(";"))
+      .join("\r\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "citybrain-incidents.csv";
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 function Kpi({ label, value, color = "#0c6a8d" }: { label: string; value: number | string; color?: string }) {

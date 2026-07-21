@@ -2,12 +2,39 @@
 
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import "leaflet.heat";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import Link from "next/link";
 import { useEffect, useMemo } from "react";
 import type { Incident } from "@/lib/types";
 import { CATEGORIES, STATUS_META } from "@/lib/categories";
 import { ALMATY_CENTER } from "@/lib/geo";
+
+type HeatFn = (
+  points: [number, number, number][],
+  options?: Record<string, unknown>,
+) => L.Layer;
+
+function HeatLayer({ incidents }: { incidents: Incident[] }) {
+  const map = useMap();
+  useEffect(() => {
+    const points = incidents.map(
+      (i) =>
+        [i.lat, i.lng, 0.4 + Math.min(1, i.confirmations / 15)] as [number, number, number],
+    );
+    const heatLayer = (L as unknown as { heatLayer: HeatFn }).heatLayer(points, {
+      radius: 32,
+      blur: 26,
+      maxZoom: 16,
+      minOpacity: 0.25,
+    });
+    heatLayer.addTo(map);
+    return () => {
+      map.removeLayer(heatLayer);
+    };
+  }, [incidents, map]);
+  return null;
+}
 
 function makeIcon(incident: Incident): L.DivIcon {
   const c = CATEGORIES[incident.category];
@@ -33,10 +60,12 @@ export default function MapInner({
   incidents,
   center,
   zoom = 12,
+  mode = "markers",
 }: {
   incidents: Incident[];
   center?: [number, number];
   zoom?: number;
+  mode?: "markers" | "heat";
 }) {
   const initial: [number, number] = center ?? [ALMATY_CENTER.lat, ALMATY_CENTER.lng];
   const markers = useMemo(
@@ -72,7 +101,7 @@ export default function MapInner({
         url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
       />
       {center && <Recenter center={initial} zoom={zoom} />}
-      {markers}
+      {mode === "heat" ? <HeatLayer incidents={incidents} /> : markers}
     </MapContainer>
   );
 }

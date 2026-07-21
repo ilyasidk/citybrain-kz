@@ -20,6 +20,11 @@ export default function ProfilePage() {
     [incidents, user.name],
   );
   const score = activityScore(stats);
+  const monthlyReported = useMemo(() => {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+    return mine.filter((i) => new Date(i.createdAt).getTime() >= monthStart).length;
+  }, [mine]);
 
   if (!hydrated) {
     return <div className="mx-auto max-w-3xl px-4 py-10 text-sm text-muted">Загрузка…</div>;
@@ -51,6 +56,9 @@ export default function ProfilePage() {
         <Metric label="Решено" value={stats.resolved} />
         <Metric label="Подтвердил чужих" value={stats.confirmationsGiven} />
       </div>
+
+      {/* Челлендж месяца */}
+      <MonthlyChallenge reported={monthlyReported} />
 
       {/* Бейджи */}
       <h2 className="mt-7 text-sm font-semibold">Бейджи и достижения</h2>
@@ -90,6 +98,46 @@ export default function ProfilePage() {
       >
         Сбросить демо-данные
       </button>
+    </div>
+  );
+}
+
+const CHALLENGE_TARGET = 5;
+
+function MonthlyChallenge({ reported }: { reported: number }) {
+  const month = new Date().toLocaleDateString("ru-RU", { month: "long" });
+  const done = reported >= CHALLENGE_TARGET;
+  const progress = Math.min(1, reported / CHALLENGE_TARGET);
+  return (
+    <div className="mt-7 overflow-hidden rounded-xl border border-border bg-surface">
+      <div className="p-4">
+        <div className="flex items-center justify-between gap-2">
+          <div className="text-sm font-semibold">🎯 Челлендж месяца</div>
+          <span className="font-mono text-[11px] uppercase tracking-wide text-muted">{month}</span>
+        </div>
+        <p className="mt-1 text-sm text-muted">
+          Сообщите о {CHALLENGE_TARGET} городских проблемах —{" "}
+          {done ? (
+            <span className="font-semibold text-brand">выполнено! 🏆</span>
+          ) : (
+            <>
+              осталось <span className="font-semibold text-foreground">{CHALLENGE_TARGET - reported}</span>
+            </>
+          )}
+        </p>
+        <div className="mt-3 flex items-center gap-3">
+          <div className="h-2 flex-1 overflow-hidden rounded-full bg-border">
+            <div
+              className="h-full rounded-full bg-sun transition-all"
+              style={{ width: `${progress * 100}%` }}
+            />
+          </div>
+          <span className="font-display text-sm font-semibold">
+            {Math.min(reported, CHALLENGE_TARGET)}/{CHALLENGE_TARGET}
+          </span>
+        </div>
+      </div>
+      {done && <div className="stripe h-1.5" aria-hidden />}
     </div>
   );
 }

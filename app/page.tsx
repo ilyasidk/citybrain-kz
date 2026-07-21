@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useStore } from "@/lib/store";
 import { CATEGORY_LIST, STATUS_META } from "@/lib/categories";
 import { DISTRICTS } from "@/lib/geo";
@@ -22,6 +22,22 @@ export default function HomePage() {
   const [status, setStatus] = useState<Status | "all">("all");
   const [district, setDistrict] = useState<string>("all");
   const [periodDays, setPeriodDays] = useState<number>(0);
+  const [query, setQuery] = useState("");
+  const [mapMode, setMapMode] = useState<"markers" | "heat">("markers");
+  const [showIntro, setShowIntro] = useState(false);
+
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem("citybrain.intro.v1")) setShowIntro(true);
+    } catch {}
+  }, []);
+
+  const dismissIntro = () => {
+    setShowIntro(false);
+    try {
+      localStorage.setItem("citybrain.intro.v1", "1");
+    } catch {}
+  };
 
   const toggleCat = (c: Category) =>
     setCats((prev) => {
@@ -33,15 +49,17 @@ export default function HomePage() {
 
   const filtered = useMemo(() => {
     const now = Date.now();
+    const q = query.trim().toLowerCase();
     return incidents.filter((i) => {
       if (cats.size && !cats.has(i.category)) return false;
       if (status !== "all" && i.status !== status) return false;
       if (district !== "all" && i.district !== district) return false;
       if (periodDays > 0 && now - new Date(i.createdAt).getTime() > periodDays * 86400000)
         return false;
+      if (q && !`${i.title} ${i.description}`.toLowerCase().includes(q)) return false;
       return true;
     });
-  }, [incidents, cats, status, district, periodDays]);
+  }, [incidents, cats, status, district, periodDays, query]);
 
   const counts = useMemo(() => {
     const c = { total: filtered.length, new: 0, in_progress: 0, resolved: 0 };
@@ -61,6 +79,23 @@ export default function HomePage() {
           Алматы · обновляется жителями
         </span>
       </div>
+
+      {showIntro && (
+        <div className="flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-2.5 text-sm">
+          <span className="min-w-0 flex-1 text-muted">
+            <span className="font-medium text-foreground">Как это работает:</span> фото проблемы →
+            AI определяет категорию → обращение попадает на карту, объединяется с похожими и
+            приоритизируется для акимата.
+          </span>
+          <button
+            onClick={dismissIntro}
+            aria-label="Скрыть подсказку"
+            className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-muted hover:bg-black/5 hover:text-foreground"
+          >
+            ×
+          </button>
+        </div>
+      )}
 
       {/* Фильтры категорий */}
       <div className="flex flex-wrap items-center gap-2">
@@ -93,6 +128,13 @@ export default function HomePage() {
         </div>
 
         <div className="ml-auto flex flex-wrap items-center gap-2 text-xs">
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="🔍 Поиск по обращениям…"
+            className="w-44 rounded-md border border-border bg-surface px-2 py-1.5 outline-none focus:border-brand"
+          />
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value as Status | "all")}
@@ -140,8 +182,30 @@ export default function HomePage() {
       </div>
 
       <div className="grid flex-1 gap-4 lg:grid-cols-[1fr_380px]">
-        <div className="order-2 h-[50vh] overflow-hidden rounded-2xl border border-border shadow-sm lg:order-1 lg:h-[calc(100vh-14rem)]">
-          <MapView incidents={filtered} />
+        <div className="relative order-2 h-[50vh] overflow-hidden rounded-2xl border border-border shadow-sm lg:order-1 lg:h-[calc(100vh-14rem)]">
+          <MapView incidents={filtered} mode={mapMode} />
+          <div className="absolute right-3 top-3 z-[500] flex rounded-lg border border-border bg-surface/95 p-0.5 text-xs shadow-sm backdrop-blur">
+            <button
+              onClick={() => setMapMode("markers")}
+              className={`rounded-md px-2.5 py-1 transition-colors ${
+                mapMode === "markers"
+                  ? "bg-ink font-medium text-white"
+                  : "text-muted hover:text-foreground"
+              }`}
+            >
+              Маркеры
+            </button>
+            <button
+              onClick={() => setMapMode("heat")}
+              className={`rounded-md px-2.5 py-1 transition-colors ${
+                mapMode === "heat"
+                  ? "bg-ink font-medium text-white"
+                  : "text-muted hover:text-foreground"
+              }`}
+            >
+              🔥 Теплокарта
+            </button>
+          </div>
         </div>
 
         <div className="order-1 flex flex-col gap-2 lg:order-2 lg:h-[calc(100vh-14rem)] lg:overflow-y-auto lg:pr-1">

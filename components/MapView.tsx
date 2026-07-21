@@ -16,6 +16,7 @@ export default function MapView(props: {
   incidents: Incident[];
   center?: [number, number];
   zoom?: number;
+  mode?: "markers" | "heat";
 }) {
   return <MapInner {...props} />;
 }

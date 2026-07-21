@@ -5,8 +5,10 @@ import { use, useMemo } from "react";
 import { useStore } from "@/lib/store";
 import { CATEGORIES, SEVERITY_META, STATUS_META } from "@/lib/categories";
 import { computePriority } from "@/lib/priority";
+import { haversineMeters } from "@/lib/geo";
 import { CategoryBadge, PhotoPlaceholder, PriorityBadge, SeverityBadge, StatusBadge } from "@/components/ui";
 import MapView from "@/components/MapView";
+import IncidentCard from "@/components/IncidentCard";
 import type { Status } from "@/lib/types";
 
 function fmt(iso: string): string {
@@ -30,6 +32,16 @@ export default function IncidentPage({ params }: { params: Promise<{ id: string 
   const { incidents, hydrated, user, confirmIncident, voteResolved, setStatus } = useStore();
   const incident = useMemo(() => incidents.find((i) => i.id === id), [incidents, id]);
   const priority = useMemo(() => (incident ? computePriority(incident) : null), [incident]);
+  const similar = useMemo(() => {
+    if (!incident) return [];
+    return incidents
+      .filter((i) => i.id !== incident.id && i.category === incident.category)
+      .map((i) => ({ i, d: haversineMeters(incident, i) }))
+      .filter((x) => x.d <= 500)
+      .sort((a, b) => a.d - b.d)
+      .slice(0, 3)
+      .map((x) => x.i);
+  }, [incidents, incident]);
 
   if (!hydrated) {
     return <div className="mx-auto max-w-3xl px-4 py-10 text-sm text-muted">Загрузка…</div>;
@@ -166,6 +178,18 @@ export default function IncidentPage({ params }: { params: Promise<{ id: string 
           ))}
         </ol>
       </div>
+
+      {/* Похожие обращения рядом */}
+      {similar.length > 0 && (
+        <div className="mt-5">
+          <div className="text-sm font-semibold">Похожие обращения рядом (≤500 м)</div>
+          <div className="mt-2 flex flex-col gap-2">
+            {similar.map((s) => (
+              <IncidentCard key={s.id} incident={s} />
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="mt-6 font-mono text-[11px] tracking-wide text-muted">
         ID: {incident.id}
