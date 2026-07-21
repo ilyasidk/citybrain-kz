@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   Area,
@@ -97,7 +97,11 @@ export default function AdminPage() {
   }, [incidents]);
 
   if (!hydrated) {
-    return <div className="mx-auto max-w-6xl px-4 py-10 text-sm text-muted">Загрузка дашборда…</div>;
+    return (
+      <div className="ops flex-1 bg-background">
+        <div className="mx-auto max-w-6xl px-4 py-10 text-sm text-muted">Загрузка дашборда…</div>
+      </div>
+    );
   }
 
   const openCount = incidents.filter((i) => i.status === "new" || i.status === "in_progress").length;
@@ -106,9 +110,11 @@ export default function AdminPage() {
     sla.length > 0 ? Math.round((sla.reduce((s, x) => s + x.avg * x.n, 0) / sla.reduce((s, x) => s + x.n, 0)) * 10) / 10 : 0;
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-6">
-      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
-        Служебная панель
+    <div className="ops flex-1 bg-background text-foreground">
+      <div className="mx-auto w-full max-w-6xl px-4 py-6">
+      <p className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
+        <span className="inline-flex h-2 w-2 animate-pulse rounded-full bg-accent" />
+        Служебная панель · live
       </p>
       <h1 className="mt-1 font-display text-xl font-semibold tracking-tight">Дашборд акимата</h1>
       <p className="mt-1 text-sm text-muted">
@@ -128,8 +134,8 @@ export default function AdminPage() {
         <Card title="Обращения по категориям">
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={byCategory} margin={{ top: 8, right: 8, bottom: 8, left: -20 }}>
-              <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-20} textAnchor="end" height={50} />
-              <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+              <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#849aa7" }} interval={0} angle={-20} textAnchor="end" height={50} />
+              <YAxis tick={{ fontSize: 11, fill: "#849aa7" }} allowDecimals={false} />
               <Tooltip />
               <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                 {byCategory.map((d) => (
@@ -143,7 +149,7 @@ export default function AdminPage() {
         <Card title="Статусы обращений">
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
-              <Pie data={byStatus} dataKey="value" nameKey="name" outerRadius={80} label>
+              <Pie data={byStatus} dataKey="value" nameKey="name" outerRadius={80} label={{ fill: "#c9d8e0", fontSize: 11 }}>
                 {byStatus.map((d) => (
                   <Cell key={d.name} fill={d.color} />
                 ))}
@@ -158,14 +164,14 @@ export default function AdminPage() {
             <AreaChart data={dynamics} margin={{ top: 8, right: 8, bottom: 8, left: -20 }}>
               <defs>
                 <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#0c6a8d" stopOpacity={0.45} />
-                  <stop offset="100%" stopColor="#0c6a8d" stopOpacity={0} />
+                  <stop offset="0%" stopColor="#31a8cf" stopOpacity={0.45} />
+                  <stop offset="100%" stopColor="#31a8cf" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+              <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#849aa7" }} />
+              <YAxis tick={{ fontSize: 11, fill: "#849aa7" }} allowDecimals={false} />
               <Tooltip />
-              <Area type="monotone" dataKey="value" stroke="#0c6a8d" fill="url(#g)" strokeWidth={2} />
+              <Area type="monotone" dataKey="value" stroke="#31a8cf" fill="url(#g)" strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
         </Card>
@@ -173,10 +179,10 @@ export default function AdminPage() {
         <Card title="Топ районов по числу жалоб">
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={byDistrict} layout="vertical" margin={{ top: 8, right: 16, bottom: 8, left: 30 }}>
-              <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
-              <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={80} />
+              <XAxis type="number" tick={{ fontSize: 11, fill: "#849aa7" }} allowDecimals={false} />
+              <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: "#849aa7" }} width={80} />
               <Tooltip />
-              <Bar dataKey="value" fill="#0c6a8d" radius={[0, 4, 4, 0]} />
+              <Bar dataKey="value" fill="#31a8cf" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </Card>
@@ -218,7 +224,7 @@ export default function AdminPage() {
             </thead>
             <tbody>
               {ranked.slice(0, 30).map(({ incident, priority }) => (
-                <tr key={incident.id} className="border-b border-border/60 hover:bg-black/[0.02]">
+                <tr key={incident.id} className="border-b border-border/60 hover:bg-white/[0.04]">
                   <td className="px-3 py-2">
                     <Link href={`/incident/${incident.id}`} className="font-medium hover:text-brand">
                       {incident.title}
@@ -259,6 +265,7 @@ export default function AdminPage() {
           </table>
         </div>
       </Card>
+      </div>
     </div>
   );
 }
@@ -291,11 +298,31 @@ function exportCsv(
   URL.revokeObjectURL(a.href);
 }
 
-function Kpi({ label, value, color = "#0c6a8d" }: { label: string; value: number | string; color?: string }) {
+function useCountUp(target: number, ms = 900): number {
+  const [v, setV] = useState(0);
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setV(target);
+      return;
+    }
+    const t0 = Date.now();
+    const timer = setInterval(() => {
+      const p = Math.min(1, (Date.now() - t0) / ms);
+      setV(Math.round(target * (1 - Math.pow(1 - p, 3))));
+      if (p >= 1) clearInterval(timer);
+    }, 30);
+    return () => clearInterval(timer);
+  }, [target, ms]);
+  return v;
+}
+
+function Kpi({ label, value, color = "#43c3ef" }: { label: string; value: number | string; color?: string }) {
+  const isNum = typeof value === "number";
+  const counted = useCountUp(isNum ? value : 0);
   return (
     <div className="rounded-xl border border-border bg-surface p-4">
       <div className="font-display text-[22px] font-semibold leading-none" style={{ color }}>
-        {value}
+        {isNum ? counted : value}
       </div>
       <div className="mt-1.5 text-[11px] uppercase tracking-wide text-muted">{label}</div>
     </div>

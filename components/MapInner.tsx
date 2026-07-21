@@ -3,7 +3,7 @@
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import "leaflet.heat";
-import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
+import { MapContainer, Marker, Popup, TileLayer, ZoomControl, useMap } from "react-leaflet";
 import Link from "next/link";
 import { useEffect, useMemo } from "react";
 import type { Incident } from "@/lib/types";
@@ -20,13 +20,21 @@ function HeatLayer({ incidents }: { incidents: Incident[] }) {
   useEffect(() => {
     const points = incidents.map(
       (i) =>
-        [i.lat, i.lng, 0.4 + Math.min(1, i.confirmations / 15)] as [number, number, number],
+        [i.lat, i.lng, 0.6 + Math.min(1, i.confirmations / 12)] as [number, number, number],
     );
     const heatLayer = (L as unknown as { heatLayer: HeatFn }).heatLayer(points, {
-      radius: 32,
-      blur: 26,
+      radius: 36,
+      blur: 28,
       maxZoom: 16,
-      minOpacity: 0.25,
+      minOpacity: 0.35,
+      max: 1.4,
+      gradient: {
+        0.15: "#1799c2",
+        0.4: "#37c2a0",
+        0.6: "#f0b120",
+        0.8: "#f2622a",
+        1: "#e21b1b",
+      },
     });
     heatLayer.addTo(map);
     return () => {
@@ -39,12 +47,13 @@ function HeatLayer({ incidents }: { incidents: Incident[] }) {
 function makeIcon(incident: Incident): L.DivIcon {
   const c = CATEGORIES[incident.category];
   const faded = incident.status === "resolved" || incident.status === "rejected";
+  const hot = incident.severity === "high" && !faded;
   return L.divIcon({
     className: "",
-    html: `<div class="cb-pin" style="background:${c.color};opacity:${faded ? 0.55 : 1}"><span>${c.emoji}</span></div>`,
-    iconSize: [30, 30],
-    iconAnchor: [15, 30],
-    popupAnchor: [0, -28],
+    html: `<div class="cb-wrap">${hot ? `<span class="cb-ping" style="background:${c.color}"></span>` : ""}<div class="cb-pin" style="background:${c.color};opacity:${faded ? 0.55 : 1}"><span>${c.emoji}</span></div></div>`,
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -30],
   });
 }
 
@@ -94,12 +103,25 @@ export default function MapInner({
     [incidents],
   );
 
+  const tileUrl =
+    mode === "heat"
+      ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+      : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+
   return (
-    <MapContainer center={initial} zoom={zoom} scrollWheelZoom className="h-full w-full">
+    <MapContainer
+      center={initial}
+      zoom={zoom}
+      scrollWheelZoom
+      zoomControl={false}
+      className="h-full w-full"
+    >
       <TileLayer
+        key={mode}
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
-        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+        url={tileUrl}
       />
+      <ZoomControl position="bottomleft" />
       {center && <Recenter center={initial} zoom={zoom} />}
       {mode === "heat" ? <HeatLayer incidents={incidents} /> : markers}
     </MapContainer>

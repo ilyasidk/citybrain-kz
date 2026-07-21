@@ -47,14 +47,14 @@ export default function Header() {
             </span>
           </Link>
 
-          <nav className="flex items-center gap-1 text-[13px]">
+          <nav className="no-scrollbar flex min-w-0 flex-1 items-center gap-1 overflow-x-auto text-[13px]">
             {NAV.map((item) => {
               const active = pathname === item.href;
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`rounded-full px-3 py-1.5 transition-colors ${
+                  className={`whitespace-nowrap rounded-full px-2.5 py-1.5 transition-colors sm:px-3 ${
                     active
                       ? "bg-ink font-medium text-white"
                       : "text-muted hover:bg-black/5 hover:text-foreground"

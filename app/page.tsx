@@ -71,35 +71,68 @@ export default function HomePage() {
     return c;
   }, [filtered]);
 
-  return (
-    <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-3 px-4 py-4">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h1 className="font-display text-lg font-semibold tracking-tight">Карта обращений</h1>
-        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
-          Алматы · обновляется жителями
-        </span>
-      </div>
+  const sorted = useMemo(
+    () =>
+      filtered.slice().sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)),
+    [filtered],
+  );
 
-      {showIntro && (
-        <div className="flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-2.5 text-sm">
-          <span className="min-w-0 flex-1 text-muted">
-            <span className="font-medium text-foreground">Как это работает:</span> фото проблемы →
-            AI определяет категорию → обращение попадает на карту, объединяется с похожими и
-            приоритизируется для акимата.
-          </span>
+  return (
+    <div className="relative flex flex-1 flex-col gap-3 px-4 py-4 lg:block lg:p-0">
+      {/* Карта — на десктопе во весь экран */}
+      <div className="relative order-2 h-[55vh] shrink-0 overflow-hidden rounded-2xl border border-border shadow-sm lg:absolute lg:inset-0 lg:h-auto lg:rounded-none lg:border-0 lg:shadow-none">
+        <MapView incidents={filtered} mode={mapMode} />
+        <div className="absolute right-3 top-3 z-[500] flex rounded-lg border border-border bg-surface/95 p-0.5 text-xs shadow-sm backdrop-blur lg:right-[424px] lg:top-4">
           <button
-            onClick={dismissIntro}
-            aria-label="Скрыть подсказку"
-            className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-muted hover:bg-black/5 hover:text-foreground"
+            onClick={() => setMapMode("markers")}
+            className={`rounded-md px-2.5 py-1 transition-colors ${
+              mapMode === "markers"
+                ? "bg-ink font-medium text-white"
+                : "text-muted hover:text-foreground"
+            }`}
           >
-            ×
+            Маркеры
+          </button>
+          <button
+            onClick={() => setMapMode("heat")}
+            className={`rounded-md px-2.5 py-1 transition-colors ${
+              mapMode === "heat"
+                ? "bg-ink font-medium text-white"
+                : "text-muted hover:text-foreground"
+            }`}
+          >
+            🔥 Теплокарта
           </button>
         </div>
-      )}
+      </div>
 
-      {/* Фильтры категорий */}
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="flex flex-wrap gap-1.5">
+      {/* Панель управления поверх карты */}
+      <div className="glass order-1 rounded-2xl p-3.5 lg:absolute lg:left-4 lg:right-[424px] lg:top-4 lg:z-[500] lg:max-w-4xl">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h1 className="font-display text-lg font-semibold tracking-tight">Карта обращений</h1>
+          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
+            Алматы · обновляется жителями
+          </span>
+        </div>
+
+        {showIntro && (
+          <div className="mt-2 flex items-center gap-3 rounded-lg bg-background/70 px-3 py-2 text-[13px]">
+            <span className="min-w-0 flex-1 text-muted">
+              <span className="font-medium text-foreground">Как это работает:</span> фото → AI
+              определяет категорию → обращение попадает на карту, объединяется с похожими и
+              приоритизируется для акимата.
+            </span>
+            <button
+              onClick={dismissIntro}
+              aria-label="Скрыть подсказку"
+              className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-muted hover:bg-black/5 hover:text-foreground"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
+        <div className="mt-2.5 flex flex-wrap gap-1.5">
           {CATEGORY_LIST.map((c) => {
             const active = cats.has(c.key);
             return (
@@ -127,7 +160,7 @@ export default function HomePage() {
           )}
         </div>
 
-        <div className="ml-auto flex flex-wrap items-center gap-2 text-xs">
+        <div className="mt-2.5 flex flex-wrap items-center gap-2 text-xs">
           <input
             type="search"
             value={query}
@@ -170,63 +203,40 @@ export default function HomePage() {
               </option>
             ))}
           </select>
-        </div>
-      </div>
 
-      {/* Сводка */}
-      <div className="flex flex-wrap gap-2 text-xs">
-        <Stat label="Всего" value={counts.total} color="#0c6a8d" />
-        <Stat label="Новые" value={counts.new} color={STATUS_META.new.color} />
-        <Stat label="В работе" value={counts.in_progress} color={STATUS_META.in_progress.color} />
-        <Stat label="Решено" value={counts.resolved} color={STATUS_META.resolved.color} />
-      </div>
-
-      <div className="grid flex-1 gap-4 lg:grid-cols-[1fr_380px]">
-        <div className="relative order-2 h-[50vh] overflow-hidden rounded-2xl border border-border shadow-sm lg:order-1 lg:h-[calc(100vh-14rem)]">
-          <MapView incidents={filtered} mode={mapMode} />
-          <div className="absolute right-3 top-3 z-[500] flex rounded-lg border border-border bg-surface/95 p-0.5 text-xs shadow-sm backdrop-blur">
-            <button
-              onClick={() => setMapMode("markers")}
-              className={`rounded-md px-2.5 py-1 transition-colors ${
-                mapMode === "markers"
-                  ? "bg-ink font-medium text-white"
-                  : "text-muted hover:text-foreground"
-              }`}
-            >
-              Маркеры
-            </button>
-            <button
-              onClick={() => setMapMode("heat")}
-              className={`rounded-md px-2.5 py-1 transition-colors ${
-                mapMode === "heat"
-                  ? "bg-ink font-medium text-white"
-                  : "text-muted hover:text-foreground"
-              }`}
-            >
-              🔥 Теплокарта
-            </button>
+          <div className="ml-auto flex flex-wrap gap-1.5">
+            <Stat label="всего" value={counts.total} color="#0c6a8d" />
+            <Stat label="новые" value={counts.new} color={STATUS_META.new.color} />
+            <Stat label="в работе" value={counts.in_progress} color={STATUS_META.in_progress.color} />
+            <Stat label="решено" value={counts.resolved} color={STATUS_META.resolved.color} />
           </div>
         </div>
+      </div>
 
-        <div className="order-1 flex flex-col gap-2 lg:order-2 lg:h-[calc(100vh-14rem)] lg:overflow-y-auto lg:pr-1">
-          {!hydrated ? (
-            <div className="text-sm text-muted">Загрузка обращений…</div>
-          ) : filtered.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted">
-              Нет обращений под выбранные фильтры.
-            </div>
-          ) : (
-            filtered
-              .slice()
-              .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
-              .map((i) => <IncidentCard key={i.id} incident={i} />)
-          )}
+      {/* Список обращений */}
+      <div className="glass order-3 flex flex-col gap-2 rounded-2xl p-3 lg:absolute lg:bottom-4 lg:right-4 lg:top-4 lg:z-[500] lg:w-[400px] lg:overflow-y-auto">
+        <div className="flex items-baseline justify-between px-1">
+          <span className="text-sm font-semibold">Обращения</span>
+          <span className="font-mono text-[11px] text-muted">{sorted.length}</span>
         </div>
+        {!hydrated ? (
+          <div className="px-1 text-sm text-muted">Загрузка обращений…</div>
+        ) : sorted.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted">
+            Нет обращений под выбранные фильтры.
+          </div>
+        ) : (
+          sorted.map((i, idx) => (
+            <div key={i.id} className="cb-fade" style={{ animationDelay: `${Math.min(idx, 12) * 35}ms` }}>
+              <IncidentCard incident={i} />
+            </div>
+          ))
+        )}
       </div>
 
       <Link
         href="/report"
-        className="fixed bottom-5 right-5 z-30 flex items-center gap-2.5 rounded-full bg-brand py-2.5 pl-3 pr-5 text-sm font-semibold text-[var(--brand-fg)] shadow-lg shadow-brand/30 transition-all hover:-translate-y-0.5 hover:shadow-xl"
+        className="fixed bottom-5 right-5 z-30 flex items-center gap-2.5 rounded-full bg-brand py-2.5 pl-3 pr-5 text-sm font-semibold text-[var(--brand-fg)] shadow-lg shadow-brand/30 transition-all hover:-translate-y-0.5 hover:shadow-xl lg:right-[424px]"
       >
         <span className="grid h-7 w-7 place-items-center rounded-full bg-sun text-base font-bold leading-none text-ink">
           ＋
@@ -239,10 +249,10 @@ export default function HomePage() {
 
 function Stat({ label, value, color }: { label: string; value: number; color: string }) {
   return (
-    <div className="flex items-center gap-2.5 rounded-xl border border-border bg-surface px-3.5 py-2">
+    <div className="flex items-center gap-1.5 rounded-lg border border-border bg-surface px-2.5 py-1.5">
       <span className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
-      <span className="font-display text-base font-semibold leading-none">{value}</span>
-      <span className="text-[11px] uppercase tracking-wide text-muted">{label}</span>
+      <span className="font-display text-[13px] font-semibold leading-none">{value}</span>
+      <span className="text-[10px] uppercase tracking-wide text-muted">{label}</span>
     </div>
   );
 }
