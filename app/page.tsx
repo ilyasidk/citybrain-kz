@@ -1,65 +1,174 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import Link from "next/link";
+import { useMemo, useState } from "react";
+import { useStore } from "@/lib/store";
+import { CATEGORY_LIST, STATUS_META } from "@/lib/categories";
+import { DISTRICTS } from "@/lib/geo";
+import MapView from "@/components/MapView";
+import IncidentCard from "@/components/IncidentCard";
+import type { Category, Status } from "@/lib/types";
+
+const PERIODS = [
+  { label: "Всё время", days: 0 },
+  { label: "7 дней", days: 7 },
+  { label: "30 дней", days: 30 },
+  { label: "60 дней", days: 60 },
+];
+
+export default function HomePage() {
+  const { incidents, hydrated } = useStore();
+  const [cats, setCats] = useState<Set<Category>>(new Set());
+  const [status, setStatus] = useState<Status | "all">("all");
+  const [district, setDistrict] = useState<string>("all");
+  const [periodDays, setPeriodDays] = useState<number>(0);
+
+  const toggleCat = (c: Category) =>
+    setCats((prev) => {
+      const next = new Set(prev);
+      if (next.has(c)) next.delete(c);
+      else next.add(c);
+      return next;
+    });
+
+  const filtered = useMemo(() => {
+    const now = Date.now();
+    return incidents.filter((i) => {
+      if (cats.size && !cats.has(i.category)) return false;
+      if (status !== "all" && i.status !== status) return false;
+      if (district !== "all" && i.district !== district) return false;
+      if (periodDays > 0 && now - new Date(i.createdAt).getTime() > periodDays * 86400000)
+        return false;
+      return true;
+    });
+  }, [incidents, cats, status, district, periodDays]);
+
+  const counts = useMemo(() => {
+    const c = { total: filtered.length, new: 0, in_progress: 0, resolved: 0 };
+    for (const i of filtered) {
+      if (i.status === "new") c.new++;
+      else if (i.status === "in_progress") c.in_progress++;
+      else if (i.status === "resolved") c.resolved++;
+    }
+    return c;
+  }, [filtered]);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-3 px-4 py-4">
+      {/* Фильтры категорий */}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap gap-1.5">
+          {CATEGORY_LIST.map((c) => {
+            const active = cats.has(c.key);
+            return (
+              <button
+                key={c.key}
+                onClick={() => toggleCat(c.key)}
+                className="rounded-full border px-2.5 py-1 text-xs font-medium transition-colors"
+                style={{
+                  borderColor: active ? c.color : "var(--border)",
+                  backgroundColor: active ? `${c.color}1a` : "var(--surface)",
+                  color: active ? c.color : "var(--muted)",
+                }}
+              >
+                {c.emoji} {c.label}
+              </button>
+            );
+          })}
+          {cats.size > 0 && (
+            <button
+              onClick={() => setCats(new Set())}
+              className="rounded-full px-2.5 py-1 text-xs text-muted underline"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+              сбросить
+            </button>
+          )}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        <div className="ml-auto flex flex-wrap items-center gap-2 text-xs">
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value as Status | "all")}
+            className="rounded-md border border-border bg-surface px-2 py-1.5"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <option value="all">Все статусы</option>
+            {(Object.keys(STATUS_META) as Status[]).map((s) => (
+              <option key={s} value={s}>
+                {STATUS_META[s].label}
+              </option>
+            ))}
+          </select>
+          <select
+            value={district}
+            onChange={(e) => setDistrict(e.target.value)}
+            className="rounded-md border border-border bg-surface px-2 py-1.5"
           >
-            Documentation
-          </a>
+            <option value="all">Все районы</option>
+            {DISTRICTS.map((d) => (
+              <option key={d} value={d}>
+                {d}
+              </option>
+            ))}
+          </select>
+          <select
+            value={periodDays}
+            onChange={(e) => setPeriodDays(Number(e.target.value))}
+            className="rounded-md border border-border bg-surface px-2 py-1.5"
+          >
+            {PERIODS.map((p) => (
+              <option key={p.days} value={p.days}>
+                {p.label}
+              </option>
+            ))}
+          </select>
         </div>
-      </main>
+      </div>
+
+      {/* Сводка */}
+      <div className="flex flex-wrap gap-2 text-xs">
+        <Stat label="Всего" value={counts.total} color="#0d5c63" />
+        <Stat label="Новые" value={counts.new} color={STATUS_META.new.color} />
+        <Stat label="В работе" value={counts.in_progress} color={STATUS_META.in_progress.color} />
+        <Stat label="Решено" value={counts.resolved} color={STATUS_META.resolved.color} />
+      </div>
+
+      <div className="grid flex-1 gap-4 lg:grid-cols-[1fr_380px]">
+        <div className="order-2 h-[50vh] overflow-hidden rounded-xl border border-border lg:order-1 lg:h-[calc(100vh-11rem)]">
+          <MapView incidents={filtered} />
+        </div>
+
+        <div className="order-1 flex flex-col gap-2 lg:order-2 lg:h-[calc(100vh-11rem)] lg:overflow-y-auto lg:pr-1">
+          {!hydrated ? (
+            <div className="text-sm text-muted">Загрузка обращений…</div>
+          ) : filtered.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted">
+              Нет обращений под выбранные фильтры.
+            </div>
+          ) : (
+            filtered
+              .slice()
+              .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
+              .map((i) => <IncidentCard key={i.id} incident={i} />)
+          )}
+        </div>
+      </div>
+
+      <Link
+        href="/report"
+        className="fixed bottom-5 right-5 z-30 flex items-center gap-2 rounded-full bg-brand px-5 py-3 text-sm font-semibold text-[var(--brand-fg)] shadow-lg transition-transform hover:scale-105"
+      >
+        <span className="text-lg leading-none">＋</span> Сообщить о проблеме
+      </Link>
+    </div>
+  );
+}
+
+function Stat({ label, value, color }: { label: string; value: number; color: string }) {
+  return (
+    <div className="flex items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-1.5">
+      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
+      <span className="font-semibold">{value}</span>
+      <span className="text-muted">{label}</span>
     </div>
   );
 }

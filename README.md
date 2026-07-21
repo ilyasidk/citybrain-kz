@@ -1,36 +1,39 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CityBrain KZ
 
-## Getting Started
+AI-платформа, которая собирает обращения жителей о городских проблемах, автоматически их классифицирует и превращает в интерактивную карту инцидентов с аналитикой для акимата.
 
-First, run the development server:
+Демо-прототип (MVP) для хакатона. Сквозной сценарий: житель фотографирует проблему → AI предлагает категорию → инцидент попадает на карту → проверяется на дубликаты рядом → приоритизируется по скорингу → отображается в дашборде акимата.
+
+## Возможности
+
+- 🗺️ **Карта инцидентов** (Leaflet + OpenStreetMap) с фильтрами по категории, статусу, району и периоду.
+- 📝 **Подача обращения**: до 3 фото, описание, выбор точки на карте / геолокация.
+- 🤖 **AI-классификация**: категория и серьёзность по тексту и фото. Работает без ключа (эвристика по ключевым словам) и с ключом (Claude через `@anthropic-ai/sdk`).
+- 🔁 **Дедупликация**: поиск похожих обращений той же категории в радиусе 100 м за 30 дней с предложением подтвердить существующий инцидент.
+- ⚡ **Приоритизация**: скоринг с учётом подтверждений, серьёзности, близости к школам/больницам и «возраста» обращения.
+- 🏅 **Геймификация и Community Verification**: бейджи, рейтинг активности, подтверждение/закрытие обращений жителями.
+- 📊 **Дашборд акимата**: статистика по категориям, статусам, динамика по неделям, топ районов, SLA, таблица по AI-приоритету со сменой статуса.
+
+## Стек
+
+Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · Leaflet / react-leaflet · Recharts · Anthropic SDK.
+
+Данные хранятся в браузере (localStorage) поверх 42 сид-инцидентов по Алматы — БД для демо не нужна.
+
+## Запуск
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### AI через Claude (опционально)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Без ключа классификация работает на эвристике. Чтобы включить Claude, задайте переменную окружения:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+ANTHROPIC_API_KEY=sk-ant-...
+```
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+На Vercel — добавьте её в Project → Settings → Environment Variables.
