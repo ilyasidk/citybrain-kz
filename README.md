@@ -1,26 +1,26 @@
 # CityBrain KZ
 
-AI-платформа, которая собирает обращения жителей о городских проблемах, автоматически их классифицирует и превращает в интерактивную карту инцидентов с аналитикой для акимата.
+An AI platform that collects residents' reports about city problems, classifies them automatically and turns them into an interactive incident map with analytics for the city administration (akimat).
 
-Демо-прототип (MVP) для хакатона. Сквозной сценарий: житель фотографирует проблему → AI предлагает категорию → инцидент попадает на карту → проверяется на дубликаты рядом → приоритизируется по скорингу → отображается в дашборде акимата.
+Hackathon demo (MVP). End-to-end flow: a resident takes a photo of a problem → AI suggests a category → the incident appears on the map → it is checked for duplicates nearby → it gets a priority score → it shows up on the akimat dashboard.
 
-## Возможности
+## Features
 
-- 🗺️ **Карта инцидентов** (Leaflet + OpenStreetMap) с фильтрами по категории, статусу, району и периоду.
-- 📝 **Подача обращения**: до 3 фото, описание, выбор точки на карте / геолокация.
-- 🤖 **AI-классификация**: категория и серьёзность по тексту и фото. Работает без ключа (эвристика по ключевым словам) и с ключом (Claude через `@anthropic-ai/sdk`).
-- 🔁 **Дедупликация**: поиск похожих обращений той же категории в радиусе 100 м за 30 дней с предложением подтвердить существующий инцидент.
-- ⚡ **Приоритизация**: скоринг с учётом подтверждений, серьёзности, близости к школам/больницам и «возраста» обращения.
-- 🏅 **Геймификация и Community Verification**: бейджи, рейтинг активности, подтверждение/закрытие обращений жителями.
-- 📊 **Дашборд акимата**: статистика по категориям, статусам, динамика по неделям, топ районов, SLA, таблица по AI-приоритету со сменой статуса.
+- **Incident map** (Leaflet + OpenStreetMap) with filters by category, status, district and period.
+- **Report submission**: up to 3 photos, a description, a point on the map or geolocation.
+- **AI classification**: category and severity from text and photos. Works without a key (keyword heuristics) and with a key (Claude via `@anthropic-ai/sdk`).
+- **Deduplication**: finds similar reports of the same category within 100 m over 30 days and offers to confirm the existing incident.
+- **Prioritization**: a score based on confirmations, severity, distance to schools and hospitals, and the age of the report.
+- **Gamification and community verification**: badges, an activity rating, residents can confirm and close reports.
+- **Akimat dashboard**: statistics by category and status, weekly trends, top districts, SLA, and a table sorted by AI priority with status changes.
 
-## Стек
+## Stack
 
 Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · Leaflet / react-leaflet · Recharts · Anthropic SDK.
 
-Данные хранятся в браузере (localStorage) поверх 42 сид-инцидентов по Алматы — БД для демо не нужна.
+Data is stored in the browser (localStorage) on top of 42 seed incidents in Almaty, so the demo needs no database.
 
-## Запуск
+## Run
 
 ```bash
 npm install
@@ -28,12 +28,12 @@ npm run dev
 # http://localhost:3000
 ```
 
-### AI через Claude (опционально)
+### AI with Claude (optional)
 
-Без ключа классификация работает на эвристике. Чтобы включить Claude, задайте переменную окружения:
+Without a key, classification uses heuristics. To enable Claude, set the environment variable:
 
 ```bash
 ANTHROPIC_API_KEY=sk-ant-...
 ```
 
-На Vercel — добавьте её в Project → Settings → Environment Variables.
+On Vercel, add it in Project → Settings → Environment Variables.
